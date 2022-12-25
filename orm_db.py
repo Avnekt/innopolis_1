@@ -1,7 +1,7 @@
 import yaml
 from datetime import datetime
 
-from sqlalchemy import Table, ForeignKey, Column, Integer, String, Float, DateTime, create_engine, MetaData
+from sqlalchemy import Table, ForeignKey, Column, Integer, String, Float, DateTime, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Mapped, Session, relationship
 from sqlalchemy.engine import URL

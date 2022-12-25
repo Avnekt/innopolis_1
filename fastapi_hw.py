@@ -3,6 +3,7 @@ import yaml
 import databases
 import sqlalchemy
 
+from dateutil.relativedelta import relativedelta
 from datetime import datetime
 from typing import List, Dict
 from pydantic import BaseModel
@@ -39,7 +40,7 @@ class Store(BaseModel):
 
 class SaleIn(BaseModel):
     id: int
-    sale_time: datetime
+    sale_time: datetime = datetime.now()
     item_id: int
     store_id: int
 
@@ -82,13 +83,20 @@ async def read_store():
 
 @app.get("/stores/top/", response_model=List[TopStores])
 async def read_store_top():
-    query = '''
+    month_ago = datetime.now().date() - relativedelta(month=1)
+    query = f'''
         SELECT 
             address,
             SUM(price) as sum_revenue
         FROM
-            stores
-        LEFT JOIN (SELECT * FROM sales LEFT JOIN items ON sales.item_id=items.id) as sales ON sales.store_id=stores.id
+            (SELECT 
+                *
+            FROM
+                stores
+            LEFT JOIN (SELECT * FROM sales LEFT JOIN items ON sales.item_id=items.id) as sales ON sales.store_id=stores.id
+            WHERE
+                sale_time >= {month_ago}
+            )
         GROUP BY
             address
         HAVING
@@ -101,13 +109,20 @@ async def read_store_top():
 
 @app.get("/items/top/", response_model=List[TopItems])
 async def read_store_top():
-    query = '''
+    month_ago = datetime.now().date() - relativedelta(month=1)
+    query = f'''
         SELECT 
             name,
             SUM(price) as sum_revenue
         FROM
-            sales
-        LEFT JOIN items ON sales.item_id=items.id
+            (SELECT
+                *
+            FROM
+                sales
+            LEFT JOIN items ON sales.item_id=items.id
+            WHERE
+                sale_time >= {month_ago}
+            )
         GROUP BY
             name
         HAVING
