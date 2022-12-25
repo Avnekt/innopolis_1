@@ -115,14 +115,8 @@ async def read_store_top():
             name,
             SUM(price) as sum_revenue
         FROM
-            (SELECT
-                *
-            FROM
-                sales
-            LEFT JOIN items ON sales.item_id=items.id
-            WHERE
-                sale_time >= {month_ago}
-            )
+            sales
+        LEFT JOIN items ON sales.item_id=items.id
         GROUP BY
             name
         HAVING
